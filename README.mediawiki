@@ -41,6 +41,26 @@ Dual licensed under the MIT (MIT-license.txt) and GPL (GPL-license.txt) licenses
 * <code>item.updated</code>
 * <code>item.id</code>
 
+These have been added to the base JFeedItem properties:
+* <code>item.latlon</code>
+* <code>item.contentEncoded</code>
+* <code>item.imageURL</code>
+
+-- Note -- latlon: latlon is stored as a string (lat and lon separated with a space) in our rss feed using the geopoint XML namespace (the tag is <geopoint:point>). The operation we use to access this field is: <code>jQuery(this).find("georss\\:point,point");</code> -- this is, from the best I can tell, the best way of parsing the XML namespace, that works in both webkit browsers and Firefox. For more information, see this jquery post: http://bugs.jquery.com/ticket/10377
+or this is discussed in this stackoverflow post: http://stackoverflow.com/questions/853740/jquery-xml-parsing-with-namespaces
+
+-- Note -- imageURL: is parsed out of contentEncoded manually, since
+our feed has contentEncodeded enclosed within CDATA flags,
+which cause the HTML information to not be parsed by the JRss parser.
+This manual workaround occurs in the new JRss._getImageURLFromSrcTag(jQueryObject) function.
+
+The _getImageURLFromSrcTag(jQueryObject) function takes a jQueryObject
+that has a cdata-section childnode, which has a data attribute, where
+the HTML that we want to use to pull our imageURL lives. We manually parse
+that HTML into a jQuery object and then loop over the <img> tags within it,
+and pull the first valid src tag of the img we find. A src tag is valid if
+it ends in .jpg, .JPG, .jpeg, .JPEG, .png, .PNG, .gif, .GIF.
+
 Please see the provided examples for more information.
 
 A basic PHP proxy is also available (<code>proxy.php</code>), if you need to load external
